@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter
+CFLAGS = -Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter -std=c99
 
 # Source files
 SRCS = $(wildcard src/*.c)

@@ -17,7 +17,10 @@ int main(int argc, char *argv[]) {
   FILE *source = get_source(argc, argv);
   char **tokens = get_tokens(source);
   for (int i = 0; i < MAX_TOKENS; i++) {
-    printf("%s\n", tokens[i]);
+    if (tokens[i] == NULL) {
+      break;
+    }
+    printf("(%s)\n", tokens[i]);
     free(tokens[i]);
   }
   free(tokens);
