@@ -1,7 +1,7 @@
 #include "common.h"
 
 /* Helper: error handling */
-void error(char *message, ...) {
+void error(string message, ...) {
   va_list args;
   va_start(args, message);
   fprintf(stderr, "Error: ");
@@ -14,15 +14,21 @@ void error(char *message, ...) {
 /* Helper: string allocation
  * Note: to save memory, call strfit() after the string is set
  */
-char *strnew() { return calloc((MAX_STRING_LENGTH + 1), sizeof(char)); }
+string strnew() {
+  string ptr = calloc((MAX_STRING_LENGTH + 1), sizeof(char));
+  if (ptr == NULL) {
+    error("Out of memory");
+  }
+  return ptr;
+}
 
 /* Helper: string re-allocation */
-char *strfit(char *src) {
+string strfit(string src) {
   const int size = strlen(src);
   if (size > MAX_STRING_LENGTH) {
-    error("Token too long (%d)", size);
+    error("Reached string length limit (%d)", MAX_STRING_LENGTH);
   }
-  char *ptr = realloc(src, (size + 1) * sizeof(char));
+  string ptr = realloc(src, (size + 1) * sizeof(char));
   if (ptr == NULL) {
     error("Out of memory");
   }

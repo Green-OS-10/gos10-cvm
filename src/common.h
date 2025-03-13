@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_STRING_LENGTH 255
+#define MAX_STRING_LENGTH 32767
 
 /* String macros for convenience
  * Note: these are not safe for production use but they will do for now
@@ -18,7 +18,7 @@
 typedef char *string;
 
 void error(char *message, ...);
-char *strnew();
-char *strfit(char *src);
+string strnew();
+string strfit(string src);
 
 #endif  // COMMON_H

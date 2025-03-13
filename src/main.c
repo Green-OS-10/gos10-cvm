@@ -18,6 +18,7 @@ int main(int argc, string argv[]) {
   lex(tokens, source);
   for (int i = 0; tokens[i] != NULL; i++) {
     printf("%s ", tokens[i]);
+    free(tokens[i]);
   }
   printf("\n");
   fclose(source);
@@ -65,12 +66,11 @@ void lex_aux(string tokens[], int token_index, FILE *source) {
   } else {
     lex_symbol(token, source);
   }
-  token = strfit(token);
   if (strlen(token) == 0) {
     free(token);
     return lex_aux(tokens, token_index, source);
   }
-  tokens[token_index] = token;
+  tokens[token_index] = strfit(token);
   return lex_aux(tokens, token_index + 1, source);
 }
 
