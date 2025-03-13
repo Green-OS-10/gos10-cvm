@@ -15,6 +15,8 @@
 #define streq(a, b) (strcmp(a, b) == 0)
 #define strcatc(a, b) (strcat(a, (char[]){b, '\0'}))
 
+typedef char *string;
+
 void error(char *message, ...);
 char *strnew();
 char *strfit(char *src);

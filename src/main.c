@@ -3,18 +3,18 @@
 #define MAX_TOKENS 32767
 
 /* Function prototypes */
-FILE *get_source(int argc, char *argv[]);
-void lex(char *tokens[], FILE *source);
-void lex_aux(char *tokens[], int token_index, FILE *source);
-void lex_word(char *token, FILE *source);
-void lex_number(char *token, FILE *source);
-void lex_quoted(char *token, FILE *source, const char quote);
-void lex_symbol(char *token, FILE *source);
+FILE *get_source(int argc, string argv[]);
+void lex(string tokens[], FILE *source);
+void lex_aux(string tokens[], int token_index, FILE *source);
+void lex_word(string token, FILE *source);
+void lex_number(string token, FILE *source);
+void lex_quoted(string token, FILE *source, const char quote);
+void lex_symbol(string token, FILE *source);
 
 /* Entry point */
-int main(int argc, char *argv[]) {
+int main(int argc, string argv[]) {
   FILE *source = get_source(argc, argv);
-  char *tokens[MAX_TOKENS];
+  string tokens[MAX_TOKENS];
   lex(tokens, source);
   for (int i = 0; tokens[i] != NULL; i++) {
     printf("%s ", tokens[i]);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 }
 
 /* Get source file from compiler arguments */
-FILE *get_source(int argc, char *argv[]) {
+FILE *get_source(int argc, string argv[]) {
   if (argc < 2) {
     fprintf(stderr, "Usage: %s <source file>\n", argv[0]);
     exit(1);
@@ -38,10 +38,10 @@ FILE *get_source(int argc, char *argv[]) {
 }
 
 /* Set tokens from source file */
-void lex(char *tokens[], FILE *source) { lex_aux(tokens, 0, source); }
+void lex(string tokens[], FILE *source) { lex_aux(tokens, 0, source); }
 
 /* Helper: tail-recursive lexer */
-void lex_aux(char *tokens[], int token_index, FILE *source) {
+void lex_aux(string tokens[], int token_index, FILE *source) {
   if (token_index >= MAX_TOKENS) {
     error("Reached token limit (%d)", MAX_TOKENS);
   }
@@ -54,7 +54,7 @@ void lex_aux(char *tokens[], int token_index, FILE *source) {
     return lex_aux(tokens, token_index, source);
   }
   ungetc(first_char, source);
-  char *token = strnew();
+  string token = strnew();
   if (isalpha(first_char) || first_char == '_') {
     lex_word(token, source);
   } else if (isdigit(first_char)) {
@@ -75,7 +75,7 @@ void lex_aux(char *tokens[], int token_index, FILE *source) {
 }
 
 /* Set word token (tail-recursive) */
-void lex_word(char *token, FILE *source) {
+void lex_word(string token, FILE *source) {
   const char current_char = fgetc(source);
   if (isalnum(current_char) || current_char == '_') {
     strcatc(token, current_char);
@@ -86,7 +86,7 @@ void lex_word(char *token, FILE *source) {
 }
 
 /* Set number token (tail-recursive) */
-void lex_number(char *token, FILE *source) {
+void lex_number(string token, FILE *source) {
   const char current_char = fgetc(source);
   if (isalnum(current_char) || current_char == '.') {
     strcatc(token, current_char);
@@ -97,7 +97,7 @@ void lex_number(char *token, FILE *source) {
 }
 
 /* Set quoted token (tail-recursive) */
-void lex_quoted(char *token, FILE *source, const char quote) {
+void lex_quoted(string token, FILE *source, const char quote) {
   const char first_char = fgetc(source);
   if (first_char == EOF) {
     error("Unexpected end of file");
@@ -121,7 +121,7 @@ void lex_quoted(char *token, FILE *source, const char quote) {
 }
 
 /* Set symbol token */
-void lex_symbol(char *token, FILE *source) {
+void lex_symbol(string token, FILE *source) {
   const char first_char = fgetc(source);
   const char second_char = fgetc(source);
   if ((first_char == '+' && second_char == '+') ||
