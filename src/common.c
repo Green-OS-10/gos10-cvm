@@ -1,6 +1,6 @@
 #include "common.h"
 
-/* Helper: error handling */
+/* Error handling */
 void error(string message, ...) {
   va_list args;
   va_start(args, message);
@@ -11,26 +11,43 @@ void error(string message, ...) {
   exit(1);
 }
 
-/* Helper: string allocation
- * Note: to save memory, call strfit() after the string is set
- */
-string strnew() {
-  string ptr = calloc((MAX_STRING_LENGTH + 1), sizeof(char));
-  if (ptr == NULL) {
+int string_equals(string a, string b) { return strcmp(a, b) == 0; }
+
+string string_new(string src) {
+  const size_t size = strlen(src);
+  string dest = malloc(size + 1);
+  if (dest == NULL) {
     error("Out of memory");
   }
-  return ptr;
+  memccpy(dest, src, '\0', size);
+  return dest;
 }
 
-/* Helper: string re-allocation */
-string strfit(string src) {
-  const int size = strlen(src);
-  if (size > MAX_STRING_LENGTH) {
-    error("Reached string length limit (%d)", MAX_STRING_LENGTH);
-  }
-  string ptr = realloc(src, (size + 1) * sizeof(char));
-  if (ptr == NULL) {
+void string_set(string *dest, string src) {
+  const size_t size = strlen(src);
+  *dest = realloc(*dest, size + 1);
+  if (dest == NULL) {
     error("Out of memory");
   }
-  return ptr;
+  memccpy(*dest, src, '\0', size);
+}
+
+void string_join(string *dest, string src) {
+  const size_t dest_size = strlen(*dest);
+  const size_t src_size = strlen(src);
+  *dest = realloc(*dest, dest_size + src_size + 1);
+  if (dest == NULL) {
+    error("Out of memory");
+  }
+  memccpy(*dest + dest_size, src, '\0', src_size);
+}
+
+void string_join_char(string *dest, char src) {
+  const size_t size = strlen(*dest) + 1;
+  *dest = realloc(*dest, size + 1);
+  if (dest == NULL) {
+    error("Out of memory");
+  }
+  (*dest)[size - 1] = src;
+  (*dest)[size] = '\0';
 }

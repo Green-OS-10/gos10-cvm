@@ -15,6 +15,7 @@ TARGET = bin/cvm
 
 # Default target
 all: $(TARGET)
+	clear
 
 # Link object files to create the executable
 $(TARGET): $(OBJS)

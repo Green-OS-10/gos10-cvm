@@ -1,15 +1,16 @@
 #include "common.h"
 
-#define MAX_TOKENS 32767
+/* Constants */
+const int MAX_TOKENS = 32767;
 
 /* Function prototypes */
 FILE *get_source(int argc, string argv[]);
 void lex(string tokens[], FILE *source);
 void lex_aux(string tokens[], int token_index, FILE *source);
-void lex_word(string token, FILE *source);
-void lex_number(string token, FILE *source);
-void lex_quoted(string token, FILE *source, const char quote);
-void lex_symbol(string token, FILE *source);
+void lex_word(string *token, FILE *source);
+void lex_number(string *token, FILE *source);
+void lex_quoted(string *token, FILE *source, const char quote);
+void lex_symbol(string *token, FILE *source);
 
 /* Entry point */
 int main(int argc, string argv[]) {
@@ -18,7 +19,6 @@ int main(int argc, string argv[]) {
   lex(tokens, source);
   for (int i = 0; tokens[i] != NULL; i++) {
     printf("%s ", tokens[i]);
-    free(tokens[i]);
   }
   printf("\n");
   fclose(source);
@@ -55,49 +55,47 @@ void lex_aux(string tokens[], int token_index, FILE *source) {
     return lex_aux(tokens, token_index, source);
   }
   ungetc(first_char, source);
-  string token = strnew();
+  string token = string_new("");
   if (isalpha(first_char) || first_char == '_') {
-    lex_word(token, source);
+    lex_word(&token, source);
   } else if (isdigit(first_char)) {
-    lex_number(token, source);
+    lex_number(&token, source);
   } else if (first_char == '\'' || first_char == '"') {
-    strcatc(token, fgetc(source));
-    lex_quoted(token, source, first_char);
+    string_join_char(&token, fgetc(source));
+    lex_quoted(&token, source, first_char);
   } else {
-    lex_symbol(token, source);
+    lex_symbol(&token, source);
   }
   if (strlen(token) == 0) {
     free(token);
     return lex_aux(tokens, token_index, source);
   }
-  tokens[token_index] = strfit(token);
+  tokens[token_index] = token;
   return lex_aux(tokens, token_index + 1, source);
 }
 
 /* Set word token (tail-recursive) */
-void lex_word(string token, FILE *source) {
+void lex_word(string *token, FILE *source) {
   const char current_char = fgetc(source);
   if (isalnum(current_char) || current_char == '_') {
-    strcatc(token, current_char);
+    string_join_char(token, current_char);
     return lex_word(token, source);
   }
   ungetc(current_char, source);
-  return;
 }
 
 /* Set number token (tail-recursive) */
-void lex_number(string token, FILE *source) {
+void lex_number(string *token, FILE *source) {
   const char current_char = fgetc(source);
   if (isalnum(current_char) || current_char == '.') {
-    strcatc(token, current_char);
+    string_join_char(token, current_char);
     return lex_number(token, source);
   }
   ungetc(current_char, source);
-  return;
 }
 
 /* Set quoted token (tail-recursive) */
-void lex_quoted(string token, FILE *source, const char quote) {
+void lex_quoted(string *token, FILE *source, const char quote) {
   const char first_char = fgetc(source);
   if (first_char == EOF) {
     error("Unexpected end of file");
@@ -109,34 +107,35 @@ void lex_quoted(string token, FILE *source, const char quote) {
                             : second_char == 'r'  ? '\r'
                             : second_char == '\\' ? '\\'
                                                   : second_char;
-    strcatc(token, replacement_char);
+    string_join_char(token, replacement_char);
     return lex_quoted(token, source, quote);
   }
   ungetc(second_char, source);
   if (first_char == quote) {
     return;
   }
-  strcatc(token, first_char);
+  string_join_char(token, first_char);
   return lex_quoted(token, source, quote);
 }
 
 /* Set symbol token */
-void lex_symbol(string token, FILE *source) {
+void lex_symbol(string *token, FILE *source) {
+  const string TWO_CHAR_SYMBOLS[] = {"++", "--", "+=", "-=", "*=", "/=", "%=",
+                                     "==", "!=", "<=", ">=", "&&", "||", NULL};
   const char first_char = fgetc(source);
   const char second_char = fgetc(source);
-  if ((first_char == '+' && second_char == '+') ||
-      (first_char == '-' && second_char == '-') ||
-      (first_char == '=' && second_char == '=') ||
-      (first_char == '!' && second_char == '=') ||
-      (first_char == '<' && second_char == '=') ||
-      (first_char == '>' && second_char == '=') ||
-      (first_char == '&' && second_char == '&') ||
-      (first_char == '|' && second_char == '|')) {
-    strcatc(token, first_char);
-    strcatc(token, second_char);
-    return;
+  string two_char_token = string_new("");
+  string_join_char(&two_char_token, first_char);
+  string_join_char(&two_char_token, second_char);
+  for (int i = 0; TWO_CHAR_SYMBOLS[i] != NULL; i++) {
+    if (string_equals(two_char_token, TWO_CHAR_SYMBOLS[i])) {
+      string_join(token, two_char_token);
+      free(two_char_token);
+      return;
+    }
   }
-  if (first_char == '/' && second_char == '/') {
+  free(two_char_token);
+  if ((first_char == '/' && second_char == '/') || first_char == '#') {
     while (fgetc(source) != '\n');
     return;
   }
@@ -145,6 +144,5 @@ void lex_symbol(string token, FILE *source) {
     return;
   }
   ungetc(second_char, source);
-  strcatc(token, first_char);
-  return;
+  string_join_char(token, first_char);
 }

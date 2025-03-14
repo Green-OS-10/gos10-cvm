@@ -7,18 +7,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_STRING_LENGTH 32767
-
-/* String macros for convenience
- * Note: these are not safe for production use but they will do for now
- */
-#define streq(a, b) (strcmp(a, b) == 0)
-#define strcatc(a, b) (strcat(a, (char[]){b, '\0'}))
-
 typedef char *string;
 
-void error(char *message, ...);
-string strnew();
-string strfit(string src);
+void error(string message, ...);
+int string_equals(string a, string b);
+string string_new(string src);
+void string_set(string *dest, string src);
+void string_join(string *dest, string src);
+void string_join_char(string *dest, char src);
 
 #endif  // COMMON_H
